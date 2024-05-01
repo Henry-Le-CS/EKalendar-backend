@@ -1,0 +1,4 @@
+github.com/Henry-Le-CS/gost v1.0.2 h1:oBvdLPY1CWHZ8fjVDbCxGsaZqo+Q8ELkmSB00ha/laI=
+github.com/Henry-Le-CS/gost v1.0.2/go.mod h1:oERM5mKFbbKNXs3sDgvCt4wqcSqY+Y39ye2lk29JIDE=
+github.com/gorilla/mux v1.8.1 h1:TuBL49tXwgrFYWhqrNgrUNEY92u81SPhu7sTdzQEiWY=
+github.com/gorilla/mux v1.8.1/go.mod h1:AKf9I4AEqPTmMytcMc0KkNouC66V3BtZ4qD5fmWSiMQ=
