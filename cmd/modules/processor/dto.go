@@ -107,3 +107,56 @@ func (c *CourseDto) AddSchedule(schedule ScheduleDto) {
 
 	c.Schedule = append(c.Schedule, schedule)
 }
+
+type CourseListDto struct {
+	Courses []CourseDto `json:"courses"`
+	Semester string `json:"semester"`
+	Year string `json:"year"`
+}
+
+func (cl *CourseListDto) AddCourse(course CourseDto) {
+	if cl.Courses == nil {
+		cl.Courses = make([]CourseDto, 0)
+	}
+
+	cl.Courses = append(cl.Courses, course)
+}
+
+func (cl CourseListDto) String() string {
+	coursesStr := ""
+
+	for index, course := range cl.Courses {
+		if course.String() == "" {
+			continue
+		}
+
+		coursesStr += course.String()
+
+		if index != len(cl.Courses) - 1 {
+			coursesStr += ", "
+		}
+	}
+
+	ret := "{ "
+
+	if cl.Year != "" {
+		ret += "Year: " + cl.Year + ", "
+	}
+
+	if cl.Semester != "" {
+		ret += "Semester: " + cl.Semester + ", "
+	}
+
+	if coursesStr != "" {
+		ret += "Courses: { " + coursesStr + " }"
+	}
+
+	// If end with ", " then remove it
+	if ret[len(ret) - 2:] == ", " {
+		ret = ret[:len(ret) - 2]
+	}
+
+	ret += " }"
+
+	return ret
+}

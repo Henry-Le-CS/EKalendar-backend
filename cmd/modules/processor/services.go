@@ -1,6 +1,7 @@
 package processor
 
 import (
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -144,7 +145,6 @@ func (s *ProcessorService) ProcessSchedule(input string) ScheduleDto {
 		Ba	2 (07g10)	N2-311	05/03/2024->05/03/2024)	UEH Nguyễn Văn Linh - N2	Khu chức năng số 15, Đô thị mới Nam TP, Xã Phong Phú, Huyện Bình Chánh, TP.HCM
 	*/
 	
-
 	chunks := strings.Split(input, "\t")
 
 	if len(chunks) <= 4 {
@@ -155,7 +155,7 @@ func (s *ProcessorService) ProcessSchedule(input string) ScheduleDto {
 	session := chunks[1]
 	room := chunks[2]
 	startDate := chunks[3][:10]
-	endDate := chunks[3][13:23]
+	endDate := chunks[3][13:22]
 	campus := chunks[4]
 	// address := chunks[5][:len(chunks[5])-1]
 	address := chunks[5]
@@ -169,4 +169,51 @@ func (s *ProcessorService) ProcessSchedule(input string) ScheduleDto {
 		Campus: campus,
 		Address: address,
 	}
+}
+
+func (s *ProcessorService) ProcessFullPage(input string) CourseListDto {
+	CourseListDto := &CourseListDto{}
+
+	lines := strings.Split(input, "\n")
+
+	block := []string{}
+	isProcessing := false
+	re := regexp.MustCompile(`Năm học:\s*(\d+)\s*-\s*Học kỳ:\s*([A-Za-z]+)`)
+
+	for i := 0; i < len(lines); i++ {
+		if strings.Contains(lines[i], "Mã LHP") {
+			// We found the beginning of a course
+			block = append(block, lines[i])
+			isProcessing = true
+		} else if isProcessing {
+			block = append(block, lines[i])
+		}
+
+		// If line match this pattern => Năm học: 2024 - Học kỳ: HKD, get year and semester
+		matches := re.FindStringSubmatch(lines[i]) 
+		
+		if len(matches) >= 3 {
+			year := matches[1]
+			semester := matches[2]
+			
+			CourseListDto.Year = year
+			CourseListDto.Semester = semester
+		}
+		
+		// At the end of a course, we process the block
+		isAtCourseEnd := i < len(lines) - 1 && strings.Contains(lines[i + 1], "Mã LHP") && isProcessing;
+		isAtLastCourse := i < len(lines) -1 && strings.Contains(lines[i + 1], "Copyright");
+		
+		if isAtCourseEnd || isAtLastCourse {
+			courseBlock := strings.Join(block, "\n")
+			course := s.ProcessCourse(courseBlock)
+			
+			CourseListDto.AddCourse(course)
+
+			isProcessing = false
+			block = []string{}
+		}
+	}
+	
+	return *CourseListDto
 }
