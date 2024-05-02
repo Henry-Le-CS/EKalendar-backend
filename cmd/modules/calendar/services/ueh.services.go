@@ -14,8 +14,23 @@ import (
 type UehCalendarService struct {
 }
 
-func (service *UehCalendarService) CreateCalendar(courseList processor.CourseListDto) {
+func (service *UehCalendarService) CreateCalendar(courseList processor.CourseListDto) error {
+	calendar := ics.NewCalendar()
+	calendar.SetMethod(ics.MethodRequest)
 
+	for _, course := range courseList.Courses {
+		events := service.CreateCourseEvents(course, courseList.Semester)
+
+		for _, event := range events {
+			calendar.AddVEvent(event)
+		}
+	}
+
+	calendar.SetTimezoneId("Asia/Ho_Chi_Minh")
+	
+	res := calendar.Serialize()
+	fmt.Println(res)
+	return nil
 }
 
 type CourseWithScheduleDto struct {
@@ -146,21 +161,33 @@ func (service *UehCalendarService) caculateStartTime(start string, startTime tim
 func (service *UehCalendarService) calculateEndTime(startTime time.Time, durationStr string) (time.Time, error) {
     durationParts := strings.Split(durationStr, "g")
 
-    if len(durationParts) != 2 {
-        return time.Time{}, fmt.Errorf("invalid duration format: %s", durationStr)
-    }
+	minutes := 0
 
     hours, err := strconv.Atoi(durationParts[0])
     if err != nil {
         return time.Time{}, fmt.Errorf("error parsing duration hours: %w", err)
     }
 
-    minutes, err := strconv.Atoi(durationParts[1])
-    if err != nil {
-        return time.Time{}, fmt.Errorf("error parsing duration minutes: %w", err)
-    }
+	if len(durationParts) == 2 {
+		minutes, err = strconv.Atoi(durationParts[1])
 
-    return startTime.Add(time.Duration(hours*60+minutes) * time.Minute), nil
+		if err != nil {
+			return time.Time{}, fmt.Errorf("error parsing duration minutes: %w", err)
+		}
+	}
+
+	endTime := time.Date(
+		startTime.Year(),
+		startTime.Month(),
+		startTime.Day(),
+		hours,
+		minutes,
+		0,
+		0,
+		time.Local,
+	)
+
+    return endTime, nil
 }
 
 func (service *UehCalendarService) countWeeksFromTimeRange(start, end time.Time) int64 {
