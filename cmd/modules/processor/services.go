@@ -155,7 +155,7 @@ func (s *ProcessorService) ProcessSchedule(input string) ScheduleDto {
 	session := chunks[1]
 	room := chunks[2]
 	startDate := chunks[3][:10]
-	endDate := chunks[3][13:22]
+	endDate := chunks[3][12:22]
 	campus := chunks[4]
 	// address := chunks[5][:len(chunks[5])-1]
 	address := chunks[5]
