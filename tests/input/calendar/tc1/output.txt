@@ -1,0 +1,29 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//arran4//Golang ICS Library
+METHOD:REQUEST
+TIMEZONE-ID:Asia/Ho_Chi_Minh
+BEGIN:VEVENT
+SUMMARY:Phát triển bất động sản nâng cao - HPTC.I.PTBDS.RE.2
+DESCRIPTION:Course: Phát triển bất động sản nâng cao\nCourse
+  Code: ECO501179\nCredits: 3\nClass Code: HPTC.I.PTBDS.RE.2\nLecturer: Lê
+  Nguyệt Trân\nLecturer Email: tranln@ueh.edu.vn\nRoom: N2-308\nCampus:
+  UEH Nguyễn Văn Linh - N2\n
+LOCATION:Khu chức năng số 15\, Đô thị mới Nam TP\, Xã Phong
+  Phú\, Huyện Bình Chánh\, TP.HCM
+DTSTART:20240318T054500Z
+DTEND:20240318T064500Z
+RRULE:FREQ=WEEKLY;UNTIL=20240513T070000Z
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:Phát triển bất động sản nâng cao - HPTC.I.PTBDS.RE.2
+DESCRIPTION:Course: Phát triển bất động sản nâng cao\nCourse
+  Code: ECO501179\nCredits: 3\nClass Code: HPTC.I.PTBDS.RE.2\nLecturer: Lê
+  Nguyệt Trân\nLecturer Email: tranln@ueh.edu.vn\nRoom: N2-311\nCampus:
+  UEH Nguyễn Văn Linh - N2\n
+LOCATION:Khu chức năng số 15\, Đô thị mới Nam TP\, Xã Phong
+  Phú\, Huyện Bình Chánh\, TP.HCM
+DTSTART:20240305T001000Z
+DTEND:20240305T011000Z
+END:VEVENT
+END:VCALENDAR

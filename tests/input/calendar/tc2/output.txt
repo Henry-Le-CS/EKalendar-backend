@@ -1,0 +1,52 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//arran4//Golang ICS Library
+METHOD:REQUEST
+TIMEZONE-ID:Asia/Ho_Chi_Minh
+BEGIN:VEVENT
+SUMMARY:Phân tích thị trường bất động sản -
+  HPTC.II.PTBDS.RE.2
+DESCRIPTION:Course: Phân tích thị trường bất động sản\nCourse
+  Code: ECO501060\nCredits: 3\nClass Code: HPTC.II.PTBDS.RE.2\nLecturer:
+  Nguyễn Lưu Bảo Đoan\nLecturer Email: doannlb@ueh.edu.vn)\, Trịnh
+  Hoài Đứ\nRoom: A211\nCampus: A\n
+LOCATION:59C Nguyễn Đình Chiểu\, P.Võ Thị Sáu\, Q.3\, TP.HCM
+DTSTART:20240313T001000Z
+DTEND:20240313T011000Z
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:Phân tích thị trường bất động sản -
+  HPTC.II.PTBDS.RE.2
+DESCRIPTION:Course: Phân tích thị trường bất động sản\nCourse
+  Code: ECO501060\nCredits: 3\nClass Code: HPTC.II.PTBDS.RE.2\nLecturer:
+  Nguyễn Lưu Bảo Đoan\nLecturer Email: doannlb@ueh.edu.vn)\, Trịnh
+  Hoài Đứ\nRoom: NGHI\nCampus: Online\n
+LOCATION:Học online
+DTSTART:20240320T001000Z
+DTEND:20240320T011000Z
+RRULE:FREQ=WEEKLY;UNTIL=20240327T070000Z
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:Phân tích thị trường bất động sản -
+  HPTC.II.PTBDS.RE.2
+DESCRIPTION:Course: Phân tích thị trường bất động sản\nCourse
+  Code: ECO501060\nCredits: 3\nClass Code: HPTC.II.PTBDS.RE.2\nLecturer:
+  Nguyễn Lưu Bảo Đoan\nLecturer Email: doannlb@ueh.edu.vn)\, Trịnh
+  Hoài Đứ\nRoom: A104a\nCampus: A\n
+LOCATION:59C Nguyễn Đình Chiểu\, P.Võ Thị Sáu\, Q.3\, TP.HCM
+DTSTART:20240406T001000Z
+DTEND:20240406T011000Z
+RRULE:FREQ=WEEKLY;UNTIL=20240511T070000Z
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:Phân tích thị trường bất động sản -
+  HPTC.II.PTBDS.RE.2
+DESCRIPTION:Course: Phân tích thị trường bất động sản\nCourse
+  Code: ECO501060\nCredits: 3\nClass Code: HPTC.II.PTBDS.RE.2\nLecturer:
+  Nguyễn Lưu Bảo Đoan\nLecturer Email: doannlb@ueh.edu.vn)\, Trịnh
+  Hoài Đứ\nRoom: NGHI\nCampus: Online\n
+LOCATION:Học online
+DTSTART:20240420T001000Z
+DTEND:20240420T011000Z
+END:VEVENT
+END:VCALENDAR
