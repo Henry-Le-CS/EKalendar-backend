@@ -86,7 +86,8 @@ func (service *UehCalendarService) SetCourseDescription(event *ics.VEvent,course
 
 	description += "Course: " + course.CourseName + "\n"
 	description += "Course Code: " + course.CourseCode + "\n"
-	description += "Credits: " + string(course.Credits) + "\n"
+
+	description += "Credits: " + strconv.Itoa(course.Credits) + "\n"
 	description += "Class Code: " + course.ClassCode + "\n"
 
 	description += "Lecturer: " + course.Lecturer + "\n"
