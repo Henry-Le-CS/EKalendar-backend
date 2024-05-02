@@ -34,11 +34,17 @@ Ba	2 (07g10)	N2-311	05/03/2024->05/03/2024)	UEH Nguyễn Văn Linh - N2	Khu ch�
 	}
 
 	// Line 2 also has schedule information
-	courseDto.AddSchedule(s.ProcessScheduleInClassInfo(lines[2]))
+	
+
+	if schedule := s.ProcessScheduleInClassInfo(lines[2]); schedule != nil {
+		courseDto.AddSchedule(*schedule)
+	}
 
 	// Process the rest of the schedule
 	for i := 3; i < len(lines); i++ {
-		courseDto.AddSchedule(s.ProcessSchedule(lines[i]))
+		if schedule := s.ProcessSchedule(lines[i]); schedule != nil {
+			courseDto.AddSchedule(*schedule)
+		}
 	}
 
 	return *courseDto
@@ -125,14 +131,14 @@ Giảng viên : Lê Nguyệt Trân (Email: tranln@ueh.edu.vn)	3	HPTC.I.PTBDS.RE.
 	}
 }
 
-func (s *ProcessorService) ProcessScheduleInClassInfo(input string) ScheduleDto {
+func (s *ProcessorService) ProcessScheduleInClassInfo(input string) *ScheduleDto {
 /*
 Giảng viên : Lê Nguyệt Trân (Email: tranln@ueh.edu.vn)	3	HPTC.I.PTBDS.RE.2	Hai	8 (12g45)	N2-308	18/03/2024->13/05/2024)	UEH Nguyễn Văn Linh - N2	Khu chức năng số 15, Đô thị mới Nam TP, Xã Phong Phú, Huyện Bình Chánh, TP.HCM
 */
 	chunks := strings.Split(input, "\t")
 
 	if len(chunks) <= 2 {
-		return ScheduleDto{}
+		return nil
 	}
 	
 	chunksWithSchedule := strings.Join(chunks[3:], "\t")
@@ -140,7 +146,7 @@ Giảng viên : Lê Nguyệt Trân (Email: tranln@ueh.edu.vn)	3	HPTC.I.PTBDS.RE.
 	return s.ProcessSchedule(chunksWithSchedule)
 }
 
-func (s *ProcessorService) ProcessSchedule(input string) ScheduleDto {
+func (s *ProcessorService) ProcessSchedule(input string) *ScheduleDto {
 	/*
 		Ba	2 (07g10)	N2-311	05/03/2024->05/03/2024)	UEH Nguyễn Văn Linh - N2	Khu chức năng số 15, Đô thị mới Nam TP, Xã Phong Phú, Huyện Bình Chánh, TP.HCM
 	*/
@@ -148,7 +154,7 @@ func (s *ProcessorService) ProcessSchedule(input string) ScheduleDto {
 	chunks := strings.Split(input, "\t")
 
 	if len(chunks) <= 4 {
-		return ScheduleDto{}
+		return nil
 	}
 
 	day := chunks[0]
@@ -160,7 +166,7 @@ func (s *ProcessorService) ProcessSchedule(input string) ScheduleDto {
 	// address := chunks[5][:len(chunks[5])-1]
 	address := chunks[5]
 
-	return ScheduleDto{
+	return &ScheduleDto{
 		Day: day,
 		Session: session,
 		Room: room,
@@ -203,8 +209,11 @@ func (s *ProcessorService) ProcessFullPage(input string) CourseListDto {
 		// At the end of a course, we process the block
 		isAtCourseEnd := i < len(lines) - 1 && strings.Contains(lines[i + 1], "Mã LHP") && isProcessing;
 		isAtLastCourse := i < len(lines) -1 && strings.Contains(lines[i + 1], "Copyright");
+		isAtEOF := i == len(lines) - 1;
+
+		shouldProcess := isAtCourseEnd || isAtLastCourse || isAtEOF
 		
-		if isAtCourseEnd || isAtLastCourse {
+		if shouldProcess {
 			courseBlock := strings.Join(block, "\n")
 			course := s.ProcessCourse(courseBlock)
 			
@@ -212,6 +221,10 @@ func (s *ProcessorService) ProcessFullPage(input string) CourseListDto {
 
 			isProcessing = false
 			block = []string{}
+		}
+
+		if isAtLastCourse {
+			break
 		}
 	}
 	
