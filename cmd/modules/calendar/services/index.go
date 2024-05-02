@@ -9,6 +9,7 @@ import (
 
 type ICalendarService interface {
 	CreateCourseEvents(course processor.CourseDto, semester string) []*ics.VEvent
+	CreateCalendar(courseList processor.CourseListDto) error
 }
 
 func NewCalendarService(university string) ICalendarService {
