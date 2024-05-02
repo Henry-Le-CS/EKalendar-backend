@@ -56,6 +56,7 @@ func (s *UehCalendarService) CreateCourseEvents(course processor.CourseDto, seme
 			ScheduleDto: schedule,
 		}
 
+		s.SetEventTitle(event,dto)
 		s.SetCourseDescription(event, dto)
 		s.SetCourseLocation(event, dto)
 		s.ScheduleForEvent(event, dto)
@@ -64,6 +65,11 @@ func (s *UehCalendarService) CreateCourseEvents(course processor.CourseDto, seme
 	}
 
 	return events
+}
+
+func (s *UehCalendarService) SetEventTitle(event *ics.VEvent, course CourseWithScheduleDto) {
+	str := course.CourseName + " - " + course.ClassCode
+	event.SetSummary(str)
 }
 
 func (service *UehCalendarService) SetCourseDescription(event *ics.VEvent,course CourseWithScheduleDto) {
