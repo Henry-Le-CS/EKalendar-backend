@@ -15,11 +15,11 @@ func CalendarControllers() *gost.Controller {
 	router.Add(gost.DeclareRouteHandler(
 		"POST",
 		"/",
-		generateCalendarHandler,
+		processCalendarFromText,
 	))
 
 	controllers := gost.DeclareController(gost.ControllerArgs{
-		Prefix: "/calendar",
+		Prefix: "/processing",
 		Router: router,
 	})
 
@@ -30,7 +30,7 @@ type TestStruct struct {
 	Abc string
 }
 
-func generateCalendarHandler(w http.ResponseWriter, r *http.Request) {
+func processCalendarFromText(w http.ResponseWriter, r *http.Request) {
 	var calendarRequestDto CalendarRequestDto
 	err := json.NewDecoder(r.Body).Decode(&calendarRequestDto)
 
@@ -43,6 +43,11 @@ func generateCalendarHandler(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println(calendarRequestDto)
 	res := common.GenerateResponse(TestStruct{Abc: "Hello"}, "")
+	processorService := NewProcessorService()
+
+	result := processorService.ProcessCourse(calendarRequestDto.Text)
+
+	fmt.Println(result)
 	w.Write(res)
 }
 
