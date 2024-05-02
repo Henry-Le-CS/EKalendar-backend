@@ -14,12 +14,17 @@ import (
 type UehCalendarService struct {
 }
 
-func (service *UehCalendarService) CreateCalendar(courseList processor.CourseListDto) error {
+func (service *UehCalendarService) CreateCalendar(courseList processor.CourseListDto) (string, error) {
 	calendar := ics.NewCalendar()
 	calendar.SetMethod(ics.MethodRequest)
 
 	for _, course := range courseList.Courses {
-		events := service.CreateCourseEvents(course, courseList.Semester)
+		events, err := service.CreateCourseEvents(course, courseList.Semester)
+
+		if err != nil {
+			fmt.Printf("Create calendar failed by execption: %s", err)
+			return "", err
+		}
 
 		for _, event := range events {
 			calendar.AddVEvent(event)
@@ -29,8 +34,7 @@ func (service *UehCalendarService) CreateCalendar(courseList processor.CourseLis
 	calendar.SetTimezoneId("Asia/Ho_Chi_Minh")
 	
 	res := calendar.Serialize()
-	fmt.Println(res)
-	return nil
+	return res, nil
 }
 
 type CourseWithScheduleDto struct {
@@ -40,15 +44,16 @@ type CourseWithScheduleDto struct {
 	processor.ScheduleDto
 }
 
-func (s *UehCalendarService) CreateCourseEvents(course processor.CourseDto, semester string) []*ics.VEvent {
+func (s *UehCalendarService) CreateCourseEvents(course processor.CourseDto, semester string) ([]*ics.VEvent, error) {
 	if len(course.Schedule) == 0 {
-		return nil
+		return nil, nil
 	}
 
 	events := make([]*ics.VEvent, 0)
 
 	for _, schedule := range course.Schedule {
 		event := &ics.VEvent{}
+
 		dto := CourseWithScheduleDto{
 			CourseInfo: course.CourseInfo,
 			CourseDetail: course.CourseDetail,
@@ -59,12 +64,16 @@ func (s *UehCalendarService) CreateCourseEvents(course processor.CourseDto, seme
 		s.SetEventTitle(event,dto)
 		s.SetCourseDescription(event, dto)
 		s.SetCourseLocation(event, dto)
-		s.ScheduleForEvent(event, dto)
+
+
+		if err := s.ScheduleForEvent(event, dto); err != nil {
+			return nil, err
+		}
 		
 		events = append(events, event)
 	}
 
-	return events
+	return events, nil
 }
 
 func (s *UehCalendarService) SetEventTitle(event *ics.VEvent, course CourseWithScheduleDto) {
@@ -93,20 +102,29 @@ func (service *UehCalendarService) SetCourseLocation(event *ics.VEvent, course C
 	event.SetLocation(course.Address)
 }
 
-func (service *UehCalendarService) ScheduleForEvent(event *ics.VEvent, course CourseWithScheduleDto) {
-	startDate, endDate := service.getStartEndDate(course)
+func (service *UehCalendarService) ScheduleForEvent(event *ics.VEvent, course CourseWithScheduleDto) error {
+	startDate, endDate, err := service.getStartEndDate(course)
+
+	if err != nil {
+		return err
+	}
+
 	startTime, endTime, err := service.GetStartEndTime(course.Session, startDate)
 
 	if err != nil {
-		fmt.Println("Error when setting start and end time")
-		return
+		fmt.Printf("Error when setting start and end time, session: %s, startDate: %s", course.Session, startDate)
+		return err
 	}
 
 	event.SetStartAt(startTime)
 	event.SetEndAt(endTime)
 
-	rule := "FREQ=WEEKLY;UNTIL=" + endDate.Format("20060102T150405Z")
-	event.AddRrule(rule)
+	if course.StartDate != course.EndDate {
+		rule := "FREQ=WEEKLY;UNTIL=" + endDate.Format("20060102T150405Z")
+		event.AddRrule(rule)
+	}
+
+	return nil
 }
 
 func (service *UehCalendarService) GetStartEndTime(session string, startTime time.Time) (time.Time, time.Time, error) {
@@ -116,8 +134,8 @@ func (service *UehCalendarService) GetStartEndTime(session string, startTime tim
         return time.Time{}, time.Time{}, fmt.Errorf("invalid session format: %s", session)
     }
 
-    sessionStart := chunks[0]
-    sessionEnd := chunks[1][:len(chunks[1])-1]
+    // sessionStart := chunks[0]
+    sessionStart := chunks[1][:len(chunks[1])-1]
 
     start, err := service.caculateStartTime(sessionStart, startTime)
 
@@ -125,7 +143,7 @@ func (service *UehCalendarService) GetStartEndTime(session string, startTime tim
 		return time.Time{}, time.Time{}, fmt.Errorf("error calculating start time: %w", err)
 	}
 
-    end, err := service.calculateEndTime(start, sessionEnd)
+    end, err := service.calculateEndTime(start, sessionStart)
 
     if err != nil {
         return time.Time{}, time.Time{}, fmt.Errorf("error calculating end time: %w", err)
@@ -169,10 +187,11 @@ func (service *UehCalendarService) calculateEndTime(startTime time.Time, duratio
 
 	minutes := 0
 
-    hours, err := strconv.Atoi(durationParts[0])
+    hour, err := strconv.Atoi(durationParts[0])
     if err != nil {
-        return time.Time{}, fmt.Errorf("error parsing duration hours: %w", err)
+        return time.Time{}, fmt.Errorf("error parsing duration hour: %w", err)
     }
+	
 
 	if len(durationParts) == 2 {
 		minutes, err = strconv.Atoi(durationParts[1])
@@ -186,7 +205,8 @@ func (service *UehCalendarService) calculateEndTime(startTime time.Time, duratio
 		startTime.Year(),
 		startTime.Month(),
 		startTime.Day(),
-		hours,
+		// End time should be start time + duration ( which is an hour now)
+		hour + 1,
 		minutes,
 		0,
 		0,
@@ -203,11 +223,12 @@ func (service *UehCalendarService) countWeeksFromTimeRange(start, end time.Time)
 	return weekCounts
 }
 
-func (service *UehCalendarService) getStartEndDate(course CourseWithScheduleDto) (time.Time, time.Time) {
+func (service *UehCalendarService) getStartEndDate(course CourseWithScheduleDto) (time.Time, time.Time, error) {
 	startDate, err := common.ParseDate(course.StartDate,"dd/MM/yyyy")
 
 	if err != nil {
-		fmt.Println("Error when parsing start date")
+		fmt.Printf("Error when parsing start date %s\n", course.StartDate)
+		return time.Time{}, time.Time{}, err
 	}
 
 
@@ -215,7 +236,8 @@ func (service *UehCalendarService) getStartEndDate(course CourseWithScheduleDto)
 
 	if err != nil {
 		fmt.Println("Error when parsing end date")
+		return time.Time{}, time.Time{}, err
 	}
 
-	return startDate, endDate
+	return startDate, endDate, nil
 }

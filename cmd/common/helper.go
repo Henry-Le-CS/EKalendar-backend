@@ -31,5 +31,11 @@ func ParseDate(date string, layout string) (time.Time, error) {
 		layout = "01/02/2006"
 	}
 
-    return time.Parse(layout, date)
+    t, err := time.Parse(layout, date)
+
+	if err != nil {
+		return time.Time{}, err
+	}
+
+	return t.Local(), nil
 }
