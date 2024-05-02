@@ -1,6 +1,7 @@
 package calendar
 
 type CalendarRequestDto struct {
-	Text string
+	Texts []string
 	Semester string
+	University string
 }
