@@ -1,6 +1,7 @@
 package main
 
 import (
+	"e-calendar/cmd/modules/calendar"
 	"e-calendar/cmd/modules/processor"
 	"log"
 
@@ -8,7 +9,10 @@ import (
 )
 
 func main() {
-	modules := []gost.IModule{processor.ProcessorModule()}
+	modules := []gost.IModule{
+		processor.ProcessorModule(),
+		calendar.CalendarModule(),
+	}
 
 	s := gost.NewServer("localhost:8080", modules)
 
