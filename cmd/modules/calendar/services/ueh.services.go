@@ -1,4 +1,4 @@
-package services
+package calender_services
 
 import (
 	"e-calendar/cmd/common"
@@ -29,7 +29,7 @@ func (s *UehCalendarService) CreateCourseEvents(course processor.CourseDto, seme
 	if len(course.Schedule) == 0 {
 		return nil
 	}
-	
+
 	events := make([]*ics.VEvent, 0)
 
 	for _, schedule := range course.Schedule {

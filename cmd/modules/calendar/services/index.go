@@ -1,4 +1,4 @@
-package services
+package calender_services
 
 import (
 	"e-calendar/cmd/modules/processor"
