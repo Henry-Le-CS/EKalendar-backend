@@ -9,7 +9,7 @@ import (
 	"github.com/Henry-Le-CS/gost"
 )
 
-func CalendarControllers() *gost.Controller {
+func ProcessorControllers() *gost.Controller {
 	router := gost.DeclareRouter()
 
 	router.Add(gost.DeclareRouteHandler(
