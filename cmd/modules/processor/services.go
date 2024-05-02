@@ -22,6 +22,10 @@ Ba	2 (07g10)	N2-311	05/03/2024->05/03/2024)	UEH Nguyễn Văn Linh - N2	Khu ch�
 */
 	lines := strings.Split(input, "\n")
 
+	if len(lines) <= 2 {
+		return CourseDto{}
+	}
+
 	// We skip the first line
 	courseInfo := s.ProcessCourseName(lines[1])
 	lecturerInfo := s.ProcessLecturer(lines[2])
@@ -152,9 +156,15 @@ func (s *ProcessorService) ProcessSchedule(input string) *ScheduleDto {
 	*/
 	
 	chunks := strings.Split(input, "\t")
-
+	
 	if len(chunks) <= 4 {
 		return nil
+	}
+
+	for i := 0; i < len(chunks); i++ {
+		if chunks[i] == "" {
+			return nil
+		}
 	}
 
 	day := chunks[0]
@@ -163,7 +173,6 @@ func (s *ProcessorService) ProcessSchedule(input string) *ScheduleDto {
 	startDate := chunks[3][:10]
 	endDate := chunks[3][12:22]
 	campus := chunks[4]
-	// address := chunks[5][:len(chunks[5])-1]
 	address := chunks[5]
 
 	return &ScheduleDto{
@@ -179,7 +188,6 @@ func (s *ProcessorService) ProcessSchedule(input string) *ScheduleDto {
 
 func (s *ProcessorService) ProcessFullPage(input string) CourseListDto {
 	CourseListDto := &CourseListDto{}
-
 	lines := strings.Split(input, "\n")
 
 	block := []string{}
