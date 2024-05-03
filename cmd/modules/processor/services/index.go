@@ -7,7 +7,7 @@ import (
 
 type IProcessorService interface {
 	ProcessFullPage(input string) (processor.CourseListDto, error)
-	ProcessCourse(input string) processor.CourseDto
+	ProcessCourse(input string) (processor.CourseDto, error)
 }
 
 func NewProcessorService(university string) (IProcessorService) {
