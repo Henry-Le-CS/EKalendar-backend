@@ -16,7 +16,7 @@ func CalendarController() *gost.Controller {
 
 	router.Add(gost.DeclareRouteHandler(
 		"POST",
-		"/",
+		"",
 		createCalendar,
 	))
 	controllers := gost.DeclareController(gost.ControllerArgs{
@@ -59,6 +59,7 @@ func createCalendar(w http.ResponseWriter, r *http.Request) {
 
 	res := common.GenerateResponse(calendar, "")
 
+	w.Header().Set("Content-Type", "application/json")
 	w.Write(res)
 }
 

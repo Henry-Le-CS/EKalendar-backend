@@ -19,6 +19,7 @@ func GenerateResponse(data interface{}, err string) []byte {
 
 func RaiseBadRequest(w http.ResponseWriter, err string) {
 	res := GenerateResponse(nil, err)
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusBadRequest)
 	w.Write(res)
 }
