@@ -26,7 +26,12 @@ func TestCreateCalendar(t *testing.T) {
 
 	calendarService := calender_services.NewCalendarService("ueh")
 
-	courseListDto := processorService.ProcessFullPage(string(input))
+	courseListDto, err := processorService.ProcessFullPage(string(input))
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
 
 	res, err := calendarService.CreateCalendar(courseListDto)
 
@@ -77,7 +82,13 @@ func TestCreateSingleEvent(t *testing.T) {
 
 	calendarService := calender_services.NewCalendarService("ueh")
 
-	courseListDto := processorService.ProcessFullPage(string(input))
+	courseListDto, err := processorService.ProcessFullPage(string(input))
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
 	res, err := calendarService.CreateCalendar(courseListDto)
 
 	if err != nil {

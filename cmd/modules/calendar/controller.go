@@ -56,7 +56,13 @@ func createCalendar(w http.ResponseWriter, r *http.Request) {
 
 	text := strings.Join(calendarRequestDto.Texts, "\n")
 
-	courseList := processorService.ProcessFullPage(text)
+	courseList, err := processorService.ProcessFullPage(text)
+
+	if err != nil {
+		common.RaiseBadRequest(w, err.Error())
+		return
+	}
+
 	calendar, err := calendarService.CreateCalendar(courseList)
 
 	if err != nil {

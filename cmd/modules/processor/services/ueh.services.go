@@ -14,13 +14,17 @@ func NewUehProcessorService() *UehProcessorService {
 	return &UehProcessorService{}
 }
 
-func (s *UehProcessorService) ProcessFullPage(input string) processor.CourseListDto {
+func (s *UehProcessorService) ProcessFullPage(input string) (processor.CourseListDto, error) {
 	CourseListDto := &processor.CourseListDto{}
 	lines := strings.Split(input, "\n")
 
 	block := []string{}
 	isProcessing := false
-	re := regexp.MustCompile(`Năm học:\s*(\d+)\s*-\s*Học kỳ:\s*([A-Za-z]+)`)
+	re, err := regexp.Compile(`Năm học:\s*(\d+)\s*-\s*Học kỳ:\s*([A-Za-z]+)`)
+
+	if err != nil {
+		return *CourseListDto, err
+	}
 
 	for i := 0; i < len(lines); i++ {
 		if strings.Contains(lines[i], "Mã LHP") {
@@ -64,7 +68,7 @@ func (s *UehProcessorService) ProcessFullPage(input string) processor.CourseList
 		}
 	}
 	
-	return *CourseListDto
+	return *CourseListDto, nil
 }
 
 func (s *UehProcessorService) ProcessCourse(input string) processor.CourseDto {

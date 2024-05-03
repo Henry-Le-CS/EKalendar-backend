@@ -7,7 +7,7 @@ import (
 )
 
 type IProcessorService interface {
-	ProcessFullPage(input string) processor.CourseListDto
+	ProcessFullPage(input string) (processor.CourseListDto, error)
 	ProcessCourse(input string) processor.CourseDto
 }
 

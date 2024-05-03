@@ -66,7 +66,12 @@ func TestFullPage(t *testing.T) {
 		return
 	}
 	
-	result := processorService.ProcessFullPage(string(input))
+	result, err := processorService.ProcessFullPage(string(input))
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
 
 	output, err := os.ReadFile(folder + "/output.txt")
 	exp := string(output)
