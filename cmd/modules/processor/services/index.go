@@ -2,7 +2,6 @@ package processor_srv
 
 import (
 	"e-calendar/cmd/modules/processor"
-	"fmt"
 	"strings"
 )
 
@@ -11,11 +10,11 @@ type IProcessorService interface {
 	ProcessCourse(input string) processor.CourseDto
 }
 
-func NewProcessorService(university string) (IProcessorService, error) {
+func NewProcessorService(university string) (IProcessorService) {
 	switch strings.ToLower(university) {
 		case "ueh":
-			return NewUehProcessorService(), nil
+			return NewUehProcessorService()
 		default:
-			return nil, fmt.Errorf("university %s is not supported", university)
+			return nil
 	}
 }

@@ -17,23 +17,10 @@ func TestCreateCalendar(t *testing.T) {
 		t.Error(err)
 	}
 
-	processorService, err := processor_srv.NewProcessorService("ueh")
+	processorService := processor_srv.NewProcessorService("ueh")
+	calendarService := calender_services.NewCalendarService("ueh", processorService)
 
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	calendarService := calender_services.NewCalendarService("ueh")
-
-	courseListDto, err := processorService.ProcessFullPage(string(input))
-
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	res, err := calendarService.CreateCalendar(courseListDto)
+	res, err := calendarService.CreateCalendar(string(input))
 
 	if err != nil {
 		t.Error(err)
@@ -73,23 +60,10 @@ func TestCreateSingleEvent(t *testing.T) {
 		return
 	}
 
-	processorService, err := processor_srv.NewProcessorService("ueh")
+	processorService := processor_srv.NewProcessorService("ueh")
+	calendarService := calender_services.NewCalendarService("ueh", processorService)
 
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	calendarService := calender_services.NewCalendarService("ueh")
-
-	courseListDto, err := processorService.ProcessFullPage(string(input))
-
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	res, err := calendarService.CreateCalendar(courseListDto)
+	res, err := calendarService.CreateCalendar(string(input))
 
 	if err != nil {
 		t.Error(err)

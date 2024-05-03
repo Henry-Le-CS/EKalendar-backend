@@ -8,12 +8,7 @@ import (
 )
 
 func TestProcessCourse(t *testing.T) {
-	processorService, err := processor_srv.NewProcessorService("ueh")
-
-	if err != nil {
-		t.Error(err)
-		return
-	}
+	processorService := processor_srv.NewProcessorService("ueh")
 
 	result := processorService.ProcessCourse(
 `2	Mã LHP: 24D1ECO50117901
@@ -28,13 +23,7 @@ Ba	2 (07g10)	N2-311	05/03/2024->05/03/2024)	UEH Nguyễn Văn Linh - N2	Khu ch�
 }
 
 func TestProcessEmptyCourse(t *testing.T) {
-	processorService, err := processor_srv.NewProcessorService("ueh")
-
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
+	processorService := processor_srv.NewProcessorService("ueh")
 	result := processorService.ProcessCourse(
 `1	Mã LHP: 24D1INS53600104
 Tên HP: Phí Bảo hiểm Y tế và Tai nạn (INS536001)
@@ -59,13 +48,7 @@ func TestFullPage(t *testing.T) {
 		return
 	}
 	
-	processorService, err := processor_srv.NewProcessorService("ueh")
-
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	
+	processorService := processor_srv.NewProcessorService("ueh")
 	result, err := processorService.ProcessFullPage(string(input))
 
 	if err != nil {

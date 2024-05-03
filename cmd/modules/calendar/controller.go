@@ -40,14 +40,8 @@ func createCalendar(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	processorService, err := processor_srv.NewProcessorService("ueh")
-
-	if err != nil {
-		common.RaiseBadRequest(w, err.Error())
-		return
-	}
-
-	calendarService := calender_services.NewCalendarService(calendarRequestDto.University)
+	processorService := processor_srv.NewProcessorService("ueh")
+	calendarService := calender_services.NewCalendarService(calendarRequestDto.University, processorService)
 
 	if calendarService == nil {
 		common.RaiseBadRequest(w, "University is not supported")
@@ -56,14 +50,7 @@ func createCalendar(w http.ResponseWriter, r *http.Request) {
 
 	text := strings.Join(calendarRequestDto.Texts, "\n")
 
-	courseList, err := processorService.ProcessFullPage(text)
-
-	if err != nil {
-		common.RaiseBadRequest(w, err.Error())
-		return
-	}
-
-	calendar, err := calendarService.CreateCalendar(courseList)
+	calendar, err := calendarService.CreateCalendar(text)
 
 	if err != nil {
 		common.RaiseBadRequest(w, err.Error())
