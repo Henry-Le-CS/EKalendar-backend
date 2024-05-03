@@ -85,9 +85,9 @@ Ba	2 (07g10)	N2-311	05/03/2024->05/03/2024)	UEH Nguyễn Văn Linh - N2	Khu ch�
 	}
 
 	// We skip the first line
-	courseInfo := s.ProcessCourseName(lines[1])
-	lecturerInfo := s.ProcessLecturer(lines[2])
-	classInfo := s.ProcessClassInfo(lines[2])
+	courseInfo := s.processCourseName(lines[1])
+	lecturerInfo := s.processLecturer(lines[2])
+	classInfo := s.processClassInfo(lines[2])
 
 	courseDto := &processor.CourseDto{
 		CourseInfo: courseInfo,
@@ -95,16 +95,11 @@ Ba	2 (07g10)	N2-311	05/03/2024->05/03/2024)	UEH Nguyễn Văn Linh - N2	Khu ch�
 		CourseDetail: classInfo,
 	}
 
-	// Line 2 also has schedule information
-	
-
-	if schedule := s.ProcessScheduleInClassInfo(lines[2]); schedule != nil {
-		courseDto.AddSchedule(*schedule)
-	}
-
 	// Process the rest of the schedule
-	for i := 3; i < len(lines); i++ {
-		if schedule := s.ProcessSchedule(lines[i]); schedule != nil {
+	for i := 2; i < len(lines); i++ {
+		prcsr := s.getScheduleProcessor(i)
+
+		if schedule := prcsr(lines[i]); schedule != nil {
 			courseDto.AddSchedule(*schedule)
 		}
 	}
@@ -112,7 +107,17 @@ Ba	2 (07g10)	N2-311	05/03/2024->05/03/2024)	UEH Nguyễn Văn Linh - N2	Khu ch�
 	return *courseDto
 }
 
-func (s *UehProcessorService) ProcessCourseName(input string) processor.CourseInfo {
+func (s *UehProcessorService) getScheduleProcessor(line int) func (string) *processor.ScheduleDto{
+	// Line 2 also has schedule information
+	// For example: Giảng viên : Lê Nguyệt Trân (Email: tranln@ueh.edu.vn)	3	HPTC.I.PTBDS.RE.2	Hai	8 (12g45)	N2-308	18/03/2024->13/05/2024)	UEH Nguyễn Văn Linh - N2	Khu chức năng số 15, Đô thị mới Nam TP, Xã Phong Phú, Huyện Bình Chánh, TP.HCM
+	if line == 2 {
+		return s.processScheduleInClassInfo
+	}
+	
+	return s.processSchedule
+}
+
+func (s *UehProcessorService) processCourseName(input string) processor.CourseInfo {
 	/*
 		Tên HP: Phát triển bất động sản nâng cao (ECO501179)
 	*/
@@ -131,7 +136,7 @@ func (s *UehProcessorService) ProcessCourseName(input string) processor.CourseIn
 	}
 }
 
-func (s *UehProcessorService) ProcessLecturer(input string) processor.LecturerInfo {
+func (s *UehProcessorService) processLecturer(input string) processor.LecturerInfo {
 /*
 Giảng viên : Lê Nguyệt Trân (Email: tranln@ueh.edu.vn)	3	HPTC.I.PTBDS.RE.2	Hai	8 (12g45)	N2-308	18/03/2024->13/05/2024)	UEH Nguyễn Văn Linh - N2	Khu chức năng số 15, Đô thị mới Nam TP, Xã Phong Phú, Huyện Bình Chánh, TP.HCM
 */
@@ -162,7 +167,7 @@ Giảng viên : Lê Nguyệt Trân (Email: tranln@ueh.edu.vn)	3	HPTC.I.PTBDS.RE.
 	}
 }
 
-func (s *UehProcessorService) ProcessClassInfo(input string) processor.CourseDetail {
+func (s *UehProcessorService) processClassInfo(input string) processor.CourseDetail {
 /*
 Giảng viên : Lê Nguyệt Trân (Email: tranln@ueh.edu.vn)	3	HPTC.I.PTBDS.RE.2	Hai	8 (12g45)	N2-308	18/03/2024->13/05/2024)	UEH Nguyễn Văn Linh - N2	Khu chức năng số 15, Đô thị mới Nam TP, Xã Phong Phú, Huyện Bình Chánh, TP.HCM
 */
@@ -193,7 +198,7 @@ Giảng viên : Lê Nguyệt Trân (Email: tranln@ueh.edu.vn)	3	HPTC.I.PTBDS.RE.
 	}
 }
 
-func (s *UehProcessorService) ProcessScheduleInClassInfo(input string) *processor.ScheduleDto {
+func (s *UehProcessorService) processScheduleInClassInfo(input string) *processor.ScheduleDto {
 /*
 Giảng viên : Lê Nguyệt Trân (Email: tranln@ueh.edu.vn)	3	HPTC.I.PTBDS.RE.2	Hai	8 (12g45)	N2-308	18/03/2024->13/05/2024)	UEH Nguyễn Văn Linh - N2	Khu chức năng số 15, Đô thị mới Nam TP, Xã Phong Phú, Huyện Bình Chánh, TP.HCM
 */
@@ -205,10 +210,10 @@ Giảng viên : Lê Nguyệt Trân (Email: tranln@ueh.edu.vn)	3	HPTC.I.PTBDS.RE.
 	
 	chunksWithSchedule := strings.Join(chunks[3:], "\t")
 
-	return s.ProcessSchedule(chunksWithSchedule)
+	return s.processSchedule(chunksWithSchedule)
 }
 
-func (s *UehProcessorService) ProcessSchedule(input string) *processor.ScheduleDto {
+func (s *UehProcessorService) processSchedule(input string) *processor.ScheduleDto {
 	/*
 		Ba	2 (07g10)	N2-311	05/03/2024->05/03/2024)	UEH Nguyễn Văn Linh - N2	Khu chức năng số 15, Đô thị mới Nam TP, Xã Phong Phú, Huyện Bình Chánh, TP.HCM
 	*/
