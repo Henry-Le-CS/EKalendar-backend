@@ -2,6 +2,7 @@ package processor_srv
 
 import (
 	"e-calendar/cmd/modules/processor"
+	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
@@ -15,7 +16,7 @@ func NewUehProcessorService() *UehProcessorService {
 }
 
 func (s *UehProcessorService) ProcessFullPage(input string) (processor.CourseListDto, error) {
-	CourseListDto := &processor.CourseListDto{}
+	courseListDto := &processor.CourseListDto{}
 	lines := strings.Split(input, "\n")
 
 	block := []string{}
@@ -23,7 +24,7 @@ func (s *UehProcessorService) ProcessFullPage(input string) (processor.CourseLis
 	re, err := regexp.Compile(`Năm học:\s*(\d+)\s*-\s*Học kỳ:\s*([A-Za-z]+)`)
 
 	if err != nil {
-		return *CourseListDto, err
+		return *courseListDto, err
 	}
 
 	for i := 0; i < len(lines); i++ {
@@ -33,7 +34,7 @@ func (s *UehProcessorService) ProcessFullPage(input string) (processor.CourseLis
 
 		// If line match this pattern => Năm học: 2024 - Học kỳ: HKD, get year and semester
 		if matches := re.FindStringSubmatch(lines[i]); len(matches) >= 3 {
-			s.processSemesterYear(CourseListDto, matches)
+			s.processSemesterYear(courseListDto, matches)
 		}
 		
 		if isProcessing {
@@ -51,7 +52,7 @@ func (s *UehProcessorService) ProcessFullPage(input string) (processor.CourseLis
 			courseBlock := strings.Join(block, "\n")
 			course := s.ProcessCourse(courseBlock)
 			
-			CourseListDto.AddCourse(course)
+			courseListDto.AddCourse(course)
 
 			isProcessing = false
 			block = []string{}
@@ -61,8 +62,12 @@ func (s *UehProcessorService) ProcessFullPage(input string) (processor.CourseLis
 			break
 		}
 	}
+
+	if !courseListDto.IsValid() {
+		return *courseListDto, fmt.Errorf("Invalid course list")
+	}
 	
-	return *CourseListDto, nil
+	return *courseListDto, nil
 }
 
 func (s *UehProcessorService) ProcessCourse(input string) processor.CourseDto {

@@ -114,6 +114,18 @@ type CourseListDto struct {
 	Year string `json:"year"`
 }
 
+func (cl *CourseListDto) IsValid() bool {
+	if cl.Courses == nil || len(cl.Courses) == 0 {
+		return false
+	}
+
+	if cl.Semester == ""  || cl.Year == "" {
+		return false
+	}
+
+	return true
+}
+
 func (cl *CourseListDto) AddCourse(course CourseDto) {
 	if cl.Courses == nil {
 		cl.Courses = make([]CourseDto, 0)
