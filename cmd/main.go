@@ -14,7 +14,12 @@ func main() {
 		calendar.CalendarModule(),
 	}
 
-	s := gost.NewServer("localhost:8080", modules)
+	s := gost.NewServer("localhost:8080", modules, &gost.ServerOptions{
+		CorsOptions: gost.CorsOptions{
+			AllowedOrigins: []string{"*"},
+			AllowCredentials: true,
+		},
+	})
 
 	if err := s.Start(); err != nil {
 		log.Fatal(err)
