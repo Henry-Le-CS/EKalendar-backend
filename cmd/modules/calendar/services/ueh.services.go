@@ -3,6 +3,7 @@ package calender_services
 import (
 	"e-calendar/cmd/common"
 	"e-calendar/cmd/modules/processor"
+	processor_srv "e-calendar/cmd/modules/processor/services"
 	"fmt"
 	"strconv"
 	"strings"
@@ -12,14 +13,21 @@ import (
 )
 
 type UehCalendarService struct {
+	processorSv processor_srv.IProcessorService
 }
 
-func (service *UehCalendarService) CreateCalendar(courseList processor.CourseListDto) (string, error) {
+func (s *UehCalendarService) CreateCalendar(input string) (string, error) {
+	courseList, err := s.processorSv.ProcessFullPage(input)
+
+	if err != nil {
+		return "", err
+	}
+
 	calendar := ics.NewCalendar()
 	calendar.SetMethod(ics.MethodRequest)
 
 	for _, course := range courseList.Courses {
-		events, err := service.CreateCourseEvents(course, courseList.Semester)
+		events, err := s.CreateCourseEvents(course, courseList.Semester)
 
 		if err != nil {
 			fmt.Printf("Create calendar failed by execption: %s", err)
