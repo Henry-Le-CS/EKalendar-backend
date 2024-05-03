@@ -28,24 +28,18 @@ func (s *UehProcessorService) ProcessFullPage(input string) (processor.CourseLis
 
 	for i := 0; i < len(lines); i++ {
 		if strings.Contains(lines[i], "Mã LHP") {
-			// We found the beginning of a course
-			block = append(block, lines[i])
 			isProcessing = true
-		} else if isProcessing {
-			block = append(block, lines[i])
 		}
 
 		// If line match this pattern => Năm học: 2024 - Học kỳ: HKD, get year and semester
-		matches := re.FindStringSubmatch(lines[i]) 
-		
-		if len(matches) >= 3 {
-			year := matches[1]
-			semester := matches[2]
-			
-			CourseListDto.Year = year
-			CourseListDto.Semester = semester
+		if matches := re.FindStringSubmatch(lines[i]); len(matches) >= 3 {
+			s.processSemesterYear(CourseListDto, matches)
 		}
 		
+		if isProcessing {
+			block = append(block, lines[i])
+		}
+
 		// At the end of a course, we process the block
 		isAtCourseEnd := i < len(lines) - 1 && strings.Contains(lines[i + 1], "Mã LHP") && isProcessing;
 		isAtLastCourse := i < len(lines) -1 && strings.Contains(lines[i + 1], "Copyright");
@@ -105,16 +99,6 @@ Ba	2 (07g10)	N2-311	05/03/2024->05/03/2024)	UEH Nguyễn Văn Linh - N2	Khu ch�
 	}
 
 	return *courseDto
-}
-
-func (s *UehProcessorService) getScheduleProcessor(line int) func (string) *processor.ScheduleDto{
-	// Line 2 also has schedule information
-	// For example: Giảng viên : Lê Nguyệt Trân (Email: tranln@ueh.edu.vn)	3	HPTC.I.PTBDS.RE.2	Hai	8 (12g45)	N2-308	18/03/2024->13/05/2024)	UEH Nguyễn Văn Linh - N2	Khu chức năng số 15, Đô thị mới Nam TP, Xã Phong Phú, Huyện Bình Chánh, TP.HCM
-	if line == 2 {
-		return s.processScheduleInClassInfo
-	}
-	
-	return s.processSchedule
 }
 
 func (s *UehProcessorService) processCourseName(input string) processor.CourseInfo {
@@ -247,4 +231,20 @@ func (s *UehProcessorService) processSchedule(input string) *processor.ScheduleD
 		Campus: campus,
 		Address: address,
 	}
+}
+
+
+func (s *UehProcessorService) getScheduleProcessor(line int) func (string) *processor.ScheduleDto{
+	// Line 2 also has schedule information
+	// For example: Giảng viên : Lê Nguyệt Trân (Email: tranln@ueh.edu.vn)	3	HPTC.I.PTBDS.RE.2	Hai	8 (12g45)	N2-308	18/03/2024->13/05/2024)	UEH Nguyễn Văn Linh - N2	Khu chức năng số 15, Đô thị mới Nam TP, Xã Phong Phú, Huyện Bình Chánh, TP.HCM
+	if line == 2 {
+		return s.processScheduleInClassInfo
+	}
+	
+	return s.processSchedule
+}
+
+func (s *UehProcessorService) processSemesterYear(CourseListDto *processor.CourseListDto,matches []string) {
+	CourseListDto.Year = matches[1]
+	CourseListDto.Semester = matches[2]
 }
