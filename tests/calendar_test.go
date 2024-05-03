@@ -10,7 +10,7 @@ import (
 )
 
 func TestCreateCalendar(t *testing.T) {
-	folder := "./input/calendar/tc1"
+	folder := "./data/calendar/tc1"
 	input, err := os.ReadFile(folder + "/input.txt")
 
 	if err != nil {
@@ -54,7 +54,7 @@ func TestCreateCalendar(t *testing.T) {
 }
 
 func TestCreateSingleEvent(t *testing.T) {
-	folder := "./input/calendar/tc2"
+	folder := "./data/calendar/tc2"
 	input, err := os.ReadFile(folder + "/input.txt")
 
 	if err != nil {
