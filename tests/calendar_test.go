@@ -2,7 +2,7 @@ package tests
 
 import (
 	calender_services "e-calendar/cmd/modules/calendar/services"
-	"e-calendar/cmd/modules/processor"
+	processor_srv "e-calendar/cmd/modules/processor/services"
 	"fmt"
 	"os"
 	"strings"
@@ -17,7 +17,13 @@ func TestCreateCalendar(t *testing.T) {
 		t.Error(err)
 	}
 
-	processorService := processor.NewProcessorService()
+	processorService, err := processor_srv.NewProcessorService("ueh")
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
 	calendarService := calender_services.NewCalendarService("ueh")
 
 	courseListDto := processorService.ProcessFullPage(string(input))
@@ -62,7 +68,13 @@ func TestCreateSingleEvent(t *testing.T) {
 		return
 	}
 
-	processorService := processor.NewProcessorService()
+	processorService, err := processor_srv.NewProcessorService("ueh")
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
 	calendarService := calender_services.NewCalendarService("ueh")
 
 	courseListDto := processorService.ProcessFullPage(string(input))

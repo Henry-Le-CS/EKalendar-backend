@@ -1,14 +1,19 @@
 package tests
 
 import (
-	"e-calendar/cmd/modules/processor"
+	processor_srv "e-calendar/cmd/modules/processor/services"
 	"fmt"
 	"os"
 	"testing"
 )
 
 func TestProcessCourse(t *testing.T) {
-	processorService := processor.NewProcessorService()
+	processorService, err := processor_srv.NewProcessorService("ueh")
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
 
 	result := processorService.ProcessCourse(
 `2	Mã LHP: 24D1ECO50117901
@@ -23,7 +28,12 @@ Ba	2 (07g10)	N2-311	05/03/2024->05/03/2024)	UEH Nguyễn Văn Linh - N2	Khu ch�
 }
 
 func TestProcessEmptyCourse(t *testing.T) {
-	processorService := processor.NewProcessorService()
+	processorService, err := processor_srv.NewProcessorService("ueh")
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
 
 	result := processorService.ProcessCourse(
 `1	Mã LHP: 24D1INS53600104
@@ -49,7 +59,13 @@ func TestFullPage(t *testing.T) {
 		return
 	}
 	
-	processorService := processor.NewProcessorService()
+	processorService, err := processor_srv.NewProcessorService("ueh")
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	
 	result := processorService.ProcessFullPage(string(input))
 
 	output, err := os.ReadFile(folder + "/output.txt")

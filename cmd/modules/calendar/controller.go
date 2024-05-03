@@ -3,7 +3,7 @@ package calendar
 import (
 	"e-calendar/cmd/common"
 	calender_services "e-calendar/cmd/modules/calendar/services"
-	"e-calendar/cmd/modules/processor"
+	processor_srv "e-calendar/cmd/modules/processor/services"
 	"encoding/json"
 	"net/http"
 	"strings"
@@ -40,7 +40,13 @@ func createCalendar(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	processorService := processor.NewProcessorService()
+	processorService, err := processor_srv.NewProcessorService("ueh")
+
+	if err != nil {
+		common.RaiseBadRequest(w, err.Error())
+		return
+	}
+
 	calendarService := calender_services.NewCalendarService(calendarRequestDto.University)
 
 	if calendarService == nil {
