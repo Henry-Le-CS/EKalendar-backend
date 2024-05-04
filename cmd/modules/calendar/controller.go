@@ -5,7 +5,6 @@ import (
 	calender_services "e-calendar/cmd/modules/calendar/services"
 	processor_srv "e-calendar/cmd/modules/processor/services"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -103,14 +102,12 @@ func AddGoogleCalendar(w http.ResponseWriter, r *http.Request) {
 	var body AddGCalDto
 
 	err := json.NewDecoder(r.Body).Decode(&body)
-
-	fmt.Println("Token", body.Token)
-
+	
 	if err != nil {
 		common.RaiseBadRequest(w, err.Error())
 		return
 	}
-
+	
 	gcalService := NewGoogleCalendarService()
 	
 	err = gcalService.UploadNewCalendar(body.Ics, body.CalendarName, &oauth2.Token{
