@@ -1,7 +1,168 @@
 package calendar
 
+import (
+	"context"
+	"fmt"
+	"net/http"
+	"os"
+	"strings"
+
+	ps "github.com/PuloV/ics-golang"
+	ics "github.com/arran4/golang-ical"
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
+	gcal "google.golang.org/api/calendar/v3"
+	"google.golang.org/api/option"
+)
+
 type CalendarRequestDto struct {
 	Texts []string
 	Semester string
 	University string
+}
+
+type GoogleCalendarService struct {}
+
+func NewGoogleCalendarService() *GoogleCalendarService {
+	return &GoogleCalendarService{}
+}
+
+func (gcs *GoogleCalendarService) UploadNewCalendar(text string, calendarName string, token *oauth2.Token) (error) {
+	cal, err := gcs.createCalendarInstance(text, calendarName)
+
+	var cId string
+
+	if err != nil {
+		return err
+	}
+
+	srv, err := gcs.CreateGCalService(token)
+
+	if err != nil {
+		return err
+	}
+
+	if cId, err = gcs.insertNewGcal(cal, srv); err != nil {
+		return err
+	}
+
+	if err = gcs.insertEventsToGcal(cal.GetEvents(), srv, cId); err != nil {
+		return err
+	
+	}
+
+	return nil
+}
+
+
+func (gcs *GoogleCalendarService) createCalendarInstance(input string, cname string) (*ps.Calendar, error) {
+	cal, err := ics.ParseCalendar(strings.NewReader(input))
+
+	if err != nil {
+		return nil, err
+	}
+
+	cal.SetName(cname)
+
+	ics := gcs.preProcessICS(cal.Serialize())
+	parser := ps.New()
+
+	parser.Load(ics)
+
+	if _, err := parser.GetErrors(); err != nil {
+		return nil, err
+	}
+
+	calendars, errCal := parser.GetCalendars()
+
+	if errCal != nil {
+		return nil, errCal
+	}
+
+	if len(calendars) == 0 {
+		return nil, fmt.Errorf("không thể tạo lịch từ dữ liệu đầu vào")
+	}
+
+	return calendars[0], nil
+}
+
+func (gcs *GoogleCalendarService) preProcessICS(input string) string {
+	// Change \r\n to \n
+	ics := strings.ReplaceAll(input, "\r\n", "\n")
+
+	return ics
+}
+
+
+func (gcs *GoogleCalendarService) insertNewGcal(calendar *ps.Calendar, srv *gcal.Service) (string, error) {
+	gcal := &gcal.Calendar{
+		Summary: calendar.GetName(),
+		TimeZone: "Asia/Ho_Chi_Minh",
+	}
+
+	if c, err := srv.Calendars.Insert(gcal).Do(); err != nil {
+		return "", err
+	} else {
+		fmt.Println("Calendar id: ", c.Id)
+		return c.Id, nil
+	}
+
+}
+
+func (gcs *GoogleCalendarService) insertEventsToGcal(events []ps.Event, srv *gcal.Service, cId string) (error){
+	for _, event := range events {
+		gcalEvent := &gcal.Event{
+			Summary: event.GetSummary(),
+			Location: event.GetLocation(),
+			Description: event.GetDescription(),
+			Start: &gcal.EventDateTime{
+				DateTime: event.GetStart().Format("2006-01-02T15:04:05-07:00"),
+				TimeZone: "Asia/Ho_Chi_Minh",
+			},
+			End: &gcal.EventDateTime{
+				DateTime: event.GetEnd().Format("2006-01-02T15:04:05-07:00"),
+				TimeZone: "Asia/Ho_Chi_Minh",
+			},
+		}
+
+		if event.GetRRule() != "" {
+			rRule := "RRULE:" + event.GetRRule()
+			gcalEvent.Recurrence = []string{rRule}
+		}
+
+		if _, err := srv.Events.Insert(cId, gcalEvent).Do(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (gcs *GoogleCalendarService) CreateGCalService(tok *oauth2.Token) (*gcal.Service, error) {
+	cf, err := gcs.getConfig()
+
+	if err != nil {
+		return nil, err
+	}
+
+	ctx := context.Background()
+
+	client := GetClient(cf, tok)
+	srv, err := gcal.NewService(ctx, option.WithHTTPClient(client))
+	
+	if err != nil {
+		return nil, err
+	}
+
+	return srv, nil
+}
+
+func (gcs *GoogleCalendarService) getConfig() (*oauth2.Config, error) {
+	creds := []byte(os.Getenv("GOOGLE_CREDENTIALS"))
+	
+	return google.ConfigFromJSON(creds, "https://www.googleapis.com/auth/calendar")
+}
+
+func GetClient(config *oauth2.Config, tok *oauth2.Token) *http.Client {
+	return config.Client(context.Background(), tok)
 }

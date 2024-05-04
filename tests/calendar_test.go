@@ -1,12 +1,15 @@
 package tests
 
 import (
+	"e-calendar/cmd/modules/calendar"
 	calender_services "e-calendar/cmd/modules/calendar/services"
 	processor_srv "e-calendar/cmd/modules/processor/services"
 	"fmt"
 	"os"
 	"strings"
 	"testing"
+
+	"golang.org/x/oauth2"
 )
 
 func TestCreateCalendar(t *testing.T) {
@@ -94,5 +97,28 @@ func TestCreateSingleEvent(t *testing.T) {
 			t.Errorf("Expected:\n%s\nGot:\n%s", expLines[i], lines[i])
 			return
 		}
+	}
+}
+
+func TestInsertCalendar(t *testing.T) {
+	folder := "./data/calendar/tc1"
+
+	input, err := os.ReadFile(folder + "/output.txt")
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	gcalService := calendar.NewGoogleCalendarService()
+
+	// Make sure to change the tokens
+	err = gcalService.UploadNewCalendar(string(input), "Test UEH 223", &oauth2.Token{
+		AccessToken: "ya29.a0AXooCguwqLFeKwlu7xou6Klg0Sq49yeYDXFVxKaC2jUW2gIitkiraCG8yNTX_DTmiBsJZLfl7Q9W4dIYfQElNNpAT6xcLZGydHBLT-4WqhWG3xop_xpzXu9GtNWKMZg-piqF0xIbJokgXGh9Rs-2EVs3zC3cyDuK8fIaCgYKAQMSARESFQHGX2MiBAVFzYvaraUvnIEP5llyhA0170",
+		TokenType: "Bearer",
+	})
+
+	if err != nil {
+		t.Error(err)
 	}
 }
