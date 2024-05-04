@@ -6,6 +6,7 @@ require (
 	github.com/Henry-Le-CS/gost v1.0.3
 	github.com/PuloV/ics-golang v0.0.0-20190808201353-a3394d3bcade
 	github.com/arran4/golang-ical v0.2.8
+	github.com/joho/godotenv v1.5.1
 	golang.org/x/oauth2 v0.19.0
 	google.golang.org/api v0.177.0
 )
