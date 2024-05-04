@@ -4,8 +4,10 @@ import (
 	"e-calendar/cmd/modules/calendar"
 	"e-calendar/cmd/modules/processor"
 	"log"
+	"os"
 
 	"github.com/Henry-Le-CS/gost"
+	"github.com/joho/godotenv"
 )
 
 func main() {
@@ -13,13 +15,24 @@ func main() {
 		processor.ProcessorModule(),
 		calendar.CalendarModule(),
 	}
+	
+	if err:= godotenv.Load(".env"); err != nil {
+		log.Fatal("Error loading .env file")
+	}
 
-	s := gost.NewServer("localhost:8080", modules, &gost.ServerOptions{
+	PORT := ":8080"
+
+	if port := os.Getenv("PORT"); port != "" {
+		PORT = ":" + port
+	}
+
+	s := gost.NewServer(PORT, modules, &gost.ServerOptions{
 		CorsOptions: gost.CorsOptions{
 			AllowedOrigins: []string{"*"},
 			AllowCredentials: true,
 		},
 	})
+
 
 	if err := s.Start(); err != nil {
 		log.Fatal(err)
