@@ -5,10 +5,12 @@ import (
 	calender_services "e-calendar/cmd/modules/calendar/services"
 	processor_srv "e-calendar/cmd/modules/processor/services"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 
 	"github.com/Henry-Le-CS/gost"
+	"golang.org/x/oauth2"
 )
 
 func CalendarController() *gost.Controller {
@@ -19,6 +21,13 @@ func CalendarController() *gost.Controller {
 		"",
 		createCalendar,
 	))
+
+	router.Add(gost.DeclareRouteHandler(
+		"POST",
+		"/add",
+		AddGoogleCalendar,
+	))
+
 	controllers := gost.DeclareController(gost.ControllerArgs{
 		Prefix: "/calendar",
 		Router: router,
@@ -76,4 +85,45 @@ func validateCalendarRequestDto(dto CalendarRequestDto, w http.ResponseWriter) b
 	}
 
 	return true
+}
+
+// ============= Add new calendar to Google Calendar =============
+
+type ReqToken struct {
+	AccessToken string
+	TokenType string
+}
+type AddGCalDto struct {
+	Ics string
+	Token ReqToken
+	CalendarName string
+}
+
+func AddGoogleCalendar(w http.ResponseWriter, r *http.Request) {
+	var body AddGCalDto
+
+	err := json.NewDecoder(r.Body).Decode(&body)
+
+	fmt.Println("Token", body.Token)
+
+	if err != nil {
+		common.RaiseBadRequest(w, err.Error())
+		return
+	}
+
+	gcalService := NewGoogleCalendarService()
+	
+	err = gcalService.UploadNewCalendar(body.Ics, body.CalendarName, &oauth2.Token{
+		AccessToken: body.Token.AccessToken,
+		TokenType: body.Token.TokenType,
+	})
+
+	if err != nil {
+		common.RaiseBadRequest(w, err.Error())
+		return
+	}
+
+	res := common.GenerateResponse("Calendar added successfully", "")
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(res)
 }
