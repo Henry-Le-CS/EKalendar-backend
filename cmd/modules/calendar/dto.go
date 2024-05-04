@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"sync"
 
 	ps "github.com/PuloV/ics-golang"
 	ics "github.com/arran4/golang-ical"
@@ -103,40 +104,52 @@ func (gcs *GoogleCalendarService) insertNewGcal(calendar *ps.Calendar, srv *gcal
 	if c, err := srv.Calendars.Insert(gcal).Do(); err != nil {
 		return "", err
 	} else {
-		fmt.Println("Calendar id: ", c.Id)
 		return c.Id, nil
 	}
 
 }
 
-func (gcs *GoogleCalendarService) insertEventsToGcal(events []ps.Event, srv *gcal.Service, cId string) (error){
-	for _, event := range events {
-		gcalEvent := &gcal.Event{
-			Summary: event.GetSummary(),
-			Location: event.GetLocation(),
-			Description: event.GetDescription(),
-			Start: &gcal.EventDateTime{
-				DateTime: event.GetStart().Format("2006-01-02T15:04:05-07:00"),
-				TimeZone: "Asia/Ho_Chi_Minh",
-			},
-			End: &gcal.EventDateTime{
-				DateTime: event.GetEnd().Format("2006-01-02T15:04:05-07:00"),
-				TimeZone: "Asia/Ho_Chi_Minh",
-			},
-		}
+func (gcs *GoogleCalendarService) insertEventsToGcal(events []ps.Event, srv *gcal.Service, cId string) error {
+    wc := sync.WaitGroup{}
 
-		if event.GetRRule() != "" {
-			rRule := "RRULE:" + event.GetRRule()
-			gcalEvent.Recurrence = []string{rRule}
-		}
+    for _, event := range events {
+        wc.Add(1)
 
-		if _, err := srv.Events.Insert(cId, gcalEvent).Do(); err != nil {
-			return err
-		}
-	}
+        go func(event ps.Event) {
+            defer wc.Done()
 
-	return nil
+            gcalEvent := &gcal.Event{
+                Summary:     event.GetSummary(),
+                Location:    event.GetLocation(),
+                Description: event.GetDescription(),
+                Start: &gcal.EventDateTime{
+                    DateTime: event.GetStart().Format("2006-01-02T15:04:05-07:00"),
+                    TimeZone: "Asia/Ho_Chi_Minh",
+                },
+                End: &gcal.EventDateTime{
+                    DateTime: event.GetEnd().Format("2006-01-02T15:04:05-07:00"),
+                    TimeZone: "Asia/Ho_Chi_Minh",
+                },
+            }
+
+            if event.GetRRule() != "" {
+                rRule := "RRULE:" + event.GetRRule()
+                gcalEvent.Recurrence = []string{rRule}
+            }
+
+            _, err := srv.Events.Insert(cId, gcalEvent).Do()
+            if err != nil {
+                // Handle error appropriately, e.g., log it
+                fmt.Println("Error inserting event:", err)
+                return
+            }
+        }(event)
+    }
+
+    wc.Wait()
+    return nil
 }
+
 
 func (gcs *GoogleCalendarService) CreateGCalService(tok *oauth2.Token) (*gcal.Service, error) {
 	cf, err := gcs.getConfig()
