@@ -125,7 +125,7 @@ func (gcs *GoogleCalendarService) insertEventsToGcal(events []ps.Event, srv *gca
 			// Then we replace the escaped newline with the real newline
 			desc = strings.ReplaceAll(desc, "\\n", "\n")
 			loc := strings.ReplaceAll(event.GetLocation(), "\\", "")
-			
+
             gcalEvent := &gcal.Event{
                 Summary:     string(event.GetSummary()),
                 Location:    loc,
@@ -141,7 +141,7 @@ func (gcs *GoogleCalendarService) insertEventsToGcal(events []ps.Event, srv *gca
             }
 
             if event.GetRRule() != "" {
-                rRule := "RRULE:" + event.GetRRule()
+                rRule := "RRULE:" + gcs.setTimeToDayEnd(event.GetRRule())
                 gcalEvent.Recurrence = []string{rRule}
             }
 
@@ -157,6 +157,17 @@ func (gcs *GoogleCalendarService) insertEventsToGcal(events []ps.Event, srv *gca
 
     wc.Wait()
     return nil
+}
+
+func (gcs *GoogleCalendarService) setTimeToDayEnd(input string) string {
+	// FREQ=WEEKLY;UNTIL=20240507T070000Z
+	t := strings.Split(input, "T")
+
+	chunkCount := len(t)
+	// Change hour part to 23
+	t[chunkCount - 1] = "23" + t[chunkCount-1][2:]
+
+	return strings.Join(t, "T")
 }
 
 
