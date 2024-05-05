@@ -8,8 +8,6 @@ import (
 	"strings"
 	"sync"
 
-	_ "time/tzdata"
-
 	ps "github.com/PuloV/ics-golang"
 	ics "github.com/arran4/golang-ical"
 	"golang.org/x/oauth2"
@@ -113,7 +111,6 @@ func (gcs *GoogleCalendarService) insertNewGcal(calendar *ps.Calendar, srv *gcal
 
 func (gcs *GoogleCalendarService) insertEventsToGcal(events []ps.Event, srv *gcal.Service, cId string) error {
     wc := sync.WaitGroup{}
-	// tz, _ := common.TimeIn("Vietnam")
 
     for _, event := range events {
         wc.Add(1)
@@ -133,11 +130,11 @@ func (gcs *GoogleCalendarService) insertEventsToGcal(events []ps.Event, srv *gca
                 Description: desc,
                 Start: &gcal.EventDateTime{
                     DateTime: event.GetStart().Format("2006-01-02T15:04:05-07:00"),
-                    // TimeZone: "Asia/Bangkok",
+                    TimeZone: "Asia/Bangkok",
                 },
                 End: &gcal.EventDateTime{
                     DateTime: event.GetEnd().Format("2006-01-02T15:04:05-07:00"),
-                    // TimeZone: "Asia/Bangkok",
+                    TimeZone: "Asia/Bangkok",
                 },
             }
 
