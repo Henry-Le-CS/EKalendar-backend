@@ -2,9 +2,11 @@ package calendar
 
 import (
 	"context"
+	"e-calendar/cmd/common"
 	"fmt"
 	"net/http"
 	"os"
+	"regexp"
 	"strings"
 	"sync"
 
@@ -91,6 +93,13 @@ func (gcs *GoogleCalendarService) preProcessICS(input string) string {
 	// Change \r\n to \n
 	ics := strings.ReplaceAll(input, "\r\n", "\n")
 
+	pattern := regexp.MustCompile("(?m)^(DTSTART|DTEND):[^\n]*Z$")
+
+    // Replace 'Z' with an empty string in lines starting with 'DTSTART' or 'DTEND'
+    ics = pattern.ReplaceAllStringFunc(ics, func(match string) string {
+        return strings.TrimSuffix(match, "Z")
+    })
+
 	return ics
 }
 
@@ -111,6 +120,7 @@ func (gcs *GoogleCalendarService) insertNewGcal(calendar *ps.Calendar, srv *gcal
 
 func (gcs *GoogleCalendarService) insertEventsToGcal(events []ps.Event, srv *gcal.Service, cId string) error {
     wc := sync.WaitGroup{}
+	tz, _ := common.TimeIn("Vietnam")
 
     for _, event := range events {
         wc.Add(1)
@@ -124,16 +134,17 @@ func (gcs *GoogleCalendarService) insertEventsToGcal(events []ps.Event, srv *gca
 			desc = strings.ReplaceAll(desc, "\\n", "\n")
 			loc := strings.ReplaceAll(event.GetLocation(), "\\", "")
 
+			// Remove the Z of the time
             gcalEvent := &gcal.Event{
                 Summary:     string(event.GetSummary()),
                 Location:    loc,
                 Description: desc,
                 Start: &gcal.EventDateTime{
-                    DateTime: event.GetStart().Format("2006-01-02T15:04:05-07:00"),
+                    DateTime: event.GetStart().In(tz).Format("2006-01-02T15:04:05-07:00"),
                     TimeZone: "Asia/Bangkok",
                 },
                 End: &gcal.EventDateTime{
-                    DateTime: event.GetEnd().Format("2006-01-02T15:04:05-07:00"),
+                    DateTime: event.GetEnd().In(tz).Format("2006-01-02T15:04:05-07:00"),
                     TimeZone: "Asia/Bangkok",
                 },
             }
