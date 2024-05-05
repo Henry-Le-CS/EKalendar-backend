@@ -92,17 +92,17 @@ func (s *UehCalendarService) SetEventTitle(event *ics.VEvent, course CourseWithS
 func (service *UehCalendarService) SetCourseDescription(event *ics.VEvent,course CourseWithScheduleDto) {
 	description := ""
 
-	description += "Course: " + course.CourseName + "\n"
-	description += "Course Code: " + course.CourseCode + "\n"
+	description += "Môn học: " + course.CourseName + "\n"
+	description += "Mã môn học: " + course.CourseCode + "\n"
 
-	description += "Credits: " + strconv.Itoa(course.Credits) + "\n"
-	description += "Class Code: " + course.ClassCode + "\n"
+	description += "Số TC: " + strconv.Itoa(course.Credits) + "\n"
+	description += "Mã lớp: " + course.ClassCode + "\n"
 
-	description += "Lecturer: " + course.Lecturer + "\n"
-	description += "Lecturer Email: " + course.LecturerEmail + "\n"
+	description += "Giảng viên: " + course.Lecturer + "\n"
+	description += "Email: " + course.LecturerEmail + "\n"
 
-	description += "Room: " + course.Room + "\n"
-	description += "Campus: " + course.Campus + "\n"
+	description += "Phòng: " + course.Room + "\n"
+	description += "Cơ sở: " + course.Campus + "\n"
 
 	event.SetDescription(description)
 }
