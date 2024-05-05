@@ -120,10 +120,16 @@ func (gcs *GoogleCalendarService) insertEventsToGcal(events []ps.Event, srv *gca
         go func(event ps.Event) {
             defer wc.Done()
 
+			// The string has malfunction newline, so we need to remove them first of all
+			desc := strings.ReplaceAll(event.GetDescription(), "\n", "")
+			// Then we replace the escaped newline with the real newline
+			desc = strings.ReplaceAll(desc, "\\n", "\n")
+			loc := strings.ReplaceAll(event.GetLocation(), "\\", "")
+			
             gcalEvent := &gcal.Event{
-                Summary:     event.GetSummary(),
-                Location:    event.GetLocation(),
-                Description: event.GetDescription(),
+                Summary:     string(event.GetSummary()),
+                Location:    loc,
+                Description: desc,
                 Start: &gcal.EventDateTime{
                     DateTime: event.GetStart().In(tz).Format("2006-01-02T15:04:05-07:00"),
                     TimeZone: "Asia/Ho_Chi_Minh",
@@ -140,6 +146,7 @@ func (gcs *GoogleCalendarService) insertEventsToGcal(events []ps.Event, srv *gca
             }
 
             _, err := srv.Events.Insert(cId, gcalEvent).Do()
+
             if err != nil {
                 // Handle error appropriately, e.g., log it
                 fmt.Println("Error inserting event:", err)
