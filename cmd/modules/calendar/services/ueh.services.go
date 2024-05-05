@@ -128,8 +128,10 @@ func (service *UehCalendarService) ScheduleForEvent(event *ics.VEvent, course Co
 	event.SetStartAt(startTime)
 	event.SetEndAt(endTime)
 
+	tz, _ := common.TimeIn("Vietnam")
+
 	if course.StartDate != course.EndDate {
-		rule := "FREQ=WEEKLY;UNTIL=" + endDate.Format("20060102T150405Z")
+		rule := "FREQ=WEEKLY;UNTIL=" + endDate.In(tz).Format("20060102T150405Z")
 		event.AddRrule(rule)
 	}
 
