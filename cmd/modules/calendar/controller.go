@@ -17,7 +17,7 @@ func CalendarController() *gost.Controller {
 
 	router.Add(gost.DeclareRouteHandler(
 		"POST",
-		"",
+		"/",
 		createCalendar,
 	))
 

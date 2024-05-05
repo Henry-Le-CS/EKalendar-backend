@@ -24,6 +24,15 @@ func RaiseBadRequest(w http.ResponseWriter, err string) {
 	w.Write(res)
 }
 
+var COUNTRY_TZ = map[string]string{
+	"Vietnam": "Asia/Ho_Chi_Minh",
+}
+
+func TimeIn(name string) (*time.Location, error){
+    return time.LoadLocation(COUNTRY_TZ[name])
+}
+
+
 func ParseDate(date string, layout string) (time.Time, error) {
 	// Issue: https://stackoverflow.com/questions/43456851/how-to-format-todays-date-in-go-as-dd-mm-yyyy
 	if layout == "dd/MM/yyyy" {
@@ -38,5 +47,11 @@ func ParseDate(date string, layout string) (time.Time, error) {
 		return time.Time{}, err
 	}
 
-	return t.Local(), nil
+	var loc *time.Location
+
+	if loc, err = TimeIn("Vietnam"); err != nil {
+		return time.Time{}, err
+	}
+
+	return t.In(loc), nil
 }

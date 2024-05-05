@@ -177,6 +177,8 @@ func (service *UehCalendarService) caculateStartTime(start string, startTime tim
 		return time.Time{}, fmt.Errorf("error parsing start time: %w", err)
 	}
 
+	tz, _ := common.TimeIn("Vietnam")
+
 	startTime = time.Date(
 		startTime.Year(), 
 		startTime.Month(), 
@@ -186,7 +188,7 @@ func (service *UehCalendarService) caculateStartTime(start string, startTime tim
 		0, 
 		0, 
 		time.Local,
-	)
+	).In(tz)
 
 	return startTime, nil
 }

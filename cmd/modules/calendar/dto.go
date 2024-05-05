@@ -2,6 +2,7 @@ package calendar
 
 import (
 	"context"
+	"e-calendar/cmd/common"
 	"fmt"
 	"net/http"
 	"os"
@@ -66,14 +67,14 @@ func (gcs *GoogleCalendarService) createCalendarInstance(input string, cname str
 	cal.SetName(cname)
 
 	ics := gcs.preProcessICS(cal.Serialize())
-	parser := ps.New()
 
+	parser := ps.New()
 	parser.Load(ics)
 
 	if _, err := parser.GetErrors(); err != nil {
 		return nil, err
 	}
-
+	
 	calendars, errCal := parser.GetCalendars()
 
 	if errCal != nil {
@@ -111,6 +112,7 @@ func (gcs *GoogleCalendarService) insertNewGcal(calendar *ps.Calendar, srv *gcal
 
 func (gcs *GoogleCalendarService) insertEventsToGcal(events []ps.Event, srv *gcal.Service, cId string) error {
     wc := sync.WaitGroup{}
+	tz, _ := common.TimeIn("Vietnam")
 
     for _, event := range events {
         wc.Add(1)
@@ -123,11 +125,11 @@ func (gcs *GoogleCalendarService) insertEventsToGcal(events []ps.Event, srv *gca
                 Location:    event.GetLocation(),
                 Description: event.GetDescription(),
                 Start: &gcal.EventDateTime{
-                    DateTime: event.GetStart().Format("2006-01-02T15:04:05-07:00"),
+                    DateTime: event.GetStart().In(tz).Format("2006-01-02T15:04:05-07:00"),
                     TimeZone: "Asia/Ho_Chi_Minh",
                 },
                 End: &gcal.EventDateTime{
-                    DateTime: event.GetEnd().Format("2006-01-02T15:04:05-07:00"),
+                    DateTime: event.GetEnd().In(tz).Format("2006-01-02T15:04:05-07:00"),
                     TimeZone: "Asia/Ho_Chi_Minh",
                 },
             }
