@@ -229,13 +229,6 @@ func (service *UehCalendarService) calculateEndTime(startTime time.Time, duratio
     return endTime, nil
 }
 
-func (service *UehCalendarService) countWeeksFromTimeRange(start, end time.Time) int64 {
-	difference := end.Sub(start)
-	weekCounts := int64(difference.Hours() / 24 / 7)
-
-	return weekCounts
-}
-
 func (service *UehCalendarService) getStartEndDate(course CourseWithScheduleDto) (time.Time, time.Time, error) {
 	startDate, err := common.ParseDate(course.StartDate,"dd/MM/yyyy")
 
