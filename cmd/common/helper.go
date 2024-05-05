@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"time"
+	_ "time/tzdata"
 )
 
 func GenerateResponse(data interface{}, err string) []byte {
