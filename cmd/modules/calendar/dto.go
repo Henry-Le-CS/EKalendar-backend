@@ -2,7 +2,6 @@ package calendar
 
 import (
 	"context"
-	"e-calendar/cmd/common"
 	"fmt"
 	"net/http"
 	"os"
@@ -114,7 +113,7 @@ func (gcs *GoogleCalendarService) insertNewGcal(calendar *ps.Calendar, srv *gcal
 
 func (gcs *GoogleCalendarService) insertEventsToGcal(events []ps.Event, srv *gcal.Service, cId string) error {
     wc := sync.WaitGroup{}
-	tz, _ := common.TimeIn("Vietnam")
+	// tz, _ := common.TimeIn("Vietnam")
 
     for _, event := range events {
         wc.Add(1)
@@ -133,12 +132,12 @@ func (gcs *GoogleCalendarService) insertEventsToGcal(events []ps.Event, srv *gca
                 Location:    loc,
                 Description: desc,
                 Start: &gcal.EventDateTime{
-                    DateTime: event.GetStart().In(tz).Format("2006-01-02T15:04:05-07:00"),
-                    TimeZone: "Asia/Bangkok",
+                    DateTime: event.GetStart().Format("2006-01-02T15:04:05-07:00"),
+                    // TimeZone: "Asia/Bangkok",
                 },
                 End: &gcal.EventDateTime{
-                    DateTime: event.GetEnd().In(tz).Format("2006-01-02T15:04:05-07:00"),
-                    TimeZone: "Asia/Bangkok",
+                    DateTime: event.GetEnd().Format("2006-01-02T15:04:05-07:00"),
+                    // TimeZone: "Asia/Bangkok",
                 },
             }
 
