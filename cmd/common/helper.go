@@ -25,7 +25,7 @@ func RaiseBadRequest(w http.ResponseWriter, err string) {
 }
 
 var COUNTRY_TZ = map[string]string{
-	"Vietnam": "Asia/Ho_Chi_Minh",
+	"Vietnam": "Asia/Bangkok",
 }
 
 func TimeIn(name string) (*time.Location, error){
