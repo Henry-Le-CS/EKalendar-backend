@@ -9,6 +9,8 @@ import (
 	"strings"
 	"sync"
 
+	_ "time/tzdata"
+
 	ps "github.com/PuloV/ics-golang"
 	ics "github.com/arran4/golang-ical"
 	"golang.org/x/oauth2"
@@ -132,11 +134,11 @@ func (gcs *GoogleCalendarService) insertEventsToGcal(events []ps.Event, srv *gca
                 Description: desc,
                 Start: &gcal.EventDateTime{
                     DateTime: event.GetStart().In(tz).Format("2006-01-02T15:04:05-07:00"),
-                    TimeZone: "Asia/Ho_Chi_Minh",
+                    TimeZone: "Asia/Bangkok",
                 },
                 End: &gcal.EventDateTime{
                     DateTime: event.GetEnd().In(tz).Format("2006-01-02T15:04:05-07:00"),
-                    TimeZone: "Asia/Ho_Chi_Minh",
+                    TimeZone: "Asia/Bangkok",
                 },
             }
 
