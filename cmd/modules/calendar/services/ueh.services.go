@@ -148,13 +148,13 @@ func (service *UehCalendarService) GetStartEndTime(session string, startTime tim
     // sessionStart := chunks[0]
     sessionStart := chunks[1][:len(chunks[1])-1]
 
-    start, err := service.caculateStartTime(sessionStart, startTime)
+    start, err := service.calculateTime(sessionStart, startTime, false)
 
 	if err != nil {
 		return time.Time{}, time.Time{}, fmt.Errorf("error calculating start time: %w", err)
 	}
 
-    end, err := service.calculateEndTime(start, sessionStart)
+    end, err := service.calculateTime(sessionStart, startTime, true)
 
     if err != nil {
         return time.Time{}, time.Time{}, fmt.Errorf("error calculating end time: %w", err)
@@ -163,7 +163,7 @@ func (service *UehCalendarService) GetStartEndTime(session string, startTime tim
     return start, end, nil
 }
 
-func (service *UehCalendarService) caculateStartTime(start string, startTime time.Time) (time.Time, error) {
+func (service *UehCalendarService) calculateTime(start string, startTime time.Time, needAdd bool) (time.Time, error) {
 	// Get time from session
 	chunks := strings.Split(start, "g")
 	minute := 0
@@ -177,6 +177,10 @@ func (service *UehCalendarService) caculateStartTime(start string, startTime tim
 	
 	if err != nil {
 		return time.Time{}, fmt.Errorf("error parsing start time: %w", err)
+	}
+
+	if needAdd {
+		hour += 1
 	}
 
 	tz, _ := common.TimeIn("Vietnam")
@@ -193,40 +197,6 @@ func (service *UehCalendarService) caculateStartTime(start string, startTime tim
 	)
 
 	return startTime, nil
-}
-
-func (service *UehCalendarService) calculateEndTime(startTime time.Time, durationStr string) (time.Time, error) {
-    durationParts := strings.Split(durationStr, "g")
-
-	minutes := 0
-
-    hour, err := strconv.Atoi(durationParts[0])
-    if err != nil {
-        return time.Time{}, fmt.Errorf("error parsing duration hour: %w", err)
-    }
-	
-
-	if len(durationParts) == 2 {
-		minutes, err = strconv.Atoi(durationParts[1])
-
-		if err != nil {
-			return time.Time{}, fmt.Errorf("error parsing duration minutes: %w", err)
-		}
-	}
-
-	endTime := time.Date(
-		startTime.Year(),
-		startTime.Month(),
-		startTime.Day(),
-		// End time should be start time + duration ( which is an hour now)
-		hour + 1,
-		minutes,
-		0,
-		0,
-		time.Local,
-	)
-
-    return endTime, nil
 }
 
 func (service *UehCalendarService) getStartEndDate(course CourseWithScheduleDto) (time.Time, time.Time, error) {
