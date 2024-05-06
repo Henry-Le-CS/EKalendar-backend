@@ -147,6 +147,13 @@ func (gcs *GoogleCalendarService) insertEventsToGcal(events []ps.Event, srv *gca
                     DateTime: event.GetEnd().In(tz).Format("2006-01-02T15:04:05-07:00"),
                     TimeZone: "Asia/Bangkok",
                 },
+				Reminders: &gcal.EventReminders{
+					Overrides: []*gcal.EventReminder{
+						{Method: "popup", Minutes: 30},
+					},
+					UseDefault:      false,
+    				ForceSendFields: []string{"UseDefault"},
+				},
             }
 
             if event.GetRRule() != "" {
